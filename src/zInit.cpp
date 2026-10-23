@@ -24,11 +24,13 @@ class LateInitializer {
             dlopen(dl_info.dli_fname, RTLD_LAZY | RTLD_NODELETE);
         }
 
-        if (!checkJvmLoaded()) {
-            const char* command = getenv("ASPROF_COMMAND");
-            if (command != NULL && OS::checkPreloaded() && Hooks::init(false)) {
-                startProfiler(command);
-            }
+        checkJvmLoaded();
+
+        // Native applications may load libjvm without creating a JVM instance.
+        // An explicit preload command must still be allowed to start profiling.
+        const char* command = getenv("ASPROF_COMMAND");
+        if (command != NULL && OS::checkPreloaded() && Hooks::init(false)) {
+            startProfiler(command);
         }
     }
 
